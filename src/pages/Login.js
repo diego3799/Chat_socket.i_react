@@ -1,18 +1,34 @@
-import React, { useContext } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
-import { UserContext } from "../components/contex";
+import { useSelector, useDispatch } from "react-redux";
+import { addUserAction, addRoomIdAction } from "../actions/sessionActions";
 
 const Login = () => {
   const { register, handleSubmit } = useForm();
-  const { setUser } = useContext(UserContext);
+  const [error, setError] = useState(null);
+  const { user } = useSelector((state) => state.session);
   const history = useHistory();
+  const dispatch = useDispatch();
   const onSubmit = ({ id, nickname }) => {
-    setUser(nickname);
+    if (id.trim() === "" || nickname.trim() === "") {
+      setError("Nickanme and Room ID must be provided");
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
+      return;
+    }
+    dispatch(addUserAction(nickname));
+    dispatch(addRoomIdAction(id));
+
     history.push(`/room/${id}`);
+  };
+  const showError = () => {
+    return <div className="bg-white max-w-sm w-full px-4 py-3 my-3 text-center" >{error}</div>;
   };
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-green-500">
+        {error && showError()}
       <div className="bg-white shadow-md rounded w-full max-w-sm px-4 py-3">
         <h1 className="text-center text-2xl  ">Enter a Room! </h1>
         <form
@@ -31,6 +47,7 @@ const Login = () => {
               type="text"
               id="nickname"
               name="nickname"
+              defaultValue={user}
               ref={register}
               placeholder="Enter nickanme"
             />
