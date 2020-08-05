@@ -11,7 +11,7 @@ const Room = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(initSocketAction("http://192.168.0.102:5000"));
+    dispatch(initSocketAction("https://socketio-server.vercel.app"));
     // eslint-disable-next-line
   }, []);
 
