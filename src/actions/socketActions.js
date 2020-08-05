@@ -10,13 +10,13 @@ const initSocket = (url) => ({
   payload: url,
 });
 
-export function closeSocketAction(user) {
+export function closeSocketAction(user, room) {
   return (dispatch) => {
-    dispatch(closeSocket(user));
+    dispatch(closeSocket(user, room));
   };
 }
 
-const closeSocket = (user) => ({
+const closeSocket = (user, room) => ({
   type: CLOSE_SOCKET,
-  payload:user
+  payload: { user, room },
 });

@@ -14,38 +14,82 @@ const ConversationPanel = () => {
   useEffect(() => {
     if (Object.keys(socket).length > 0) {
       socket.emit("join-room", room, user);
-      socket.on("msg", (data) => {
-        setMensajes(data);
+      socket.on("msg", (data, type) => {
+        setMensajes({ data, type });
       });
     }
     // eslint-disable-next-line
   }, [socket]);
   useEffect(() => {
     if (mensajes) {
-      setResponse([...response, mensajes]);
+      console.log(mensajes);
+      switch (mensajes.type) {
+        case "msg":
+          const remake=mensajes.data.split(":");
+          setResponse([
+            ...response,
+            <li className="mt-2 text-right w-full max-w-sm ml-auto">
+              <span className="italic font-semibold text-lg mr-1">{remake[0]}:</span>
+              {remake[1]}
+            </li>,
+          ]);
+
+          return;
+        case "goodbye":
+          setResponse([
+            ...response,
+            <li
+              key={mensajes.data}
+              className="text-center my-2 text-lg text-red-800 w-full bg-red-100"
+            >
+              {mensajes.data}
+            </li>,
+          ]);
+          return;
+        case "enter":
+          setResponse([
+            ...response,
+            <li
+              key={mensajes.data}
+              className="text-center my-2 text-lg text-green-800 w-full bg-green-100"
+            >
+              {mensajes.data}
+            </li>,
+          ]);
+          return;
+        default:
+          setResponse([
+            ...response,
+            <li key={mensajes.data}>{mensajes.data}</li>,
+          ]);
+          return;
+      }
     }
     // eslint-disable-next-line
   }, [mensajes]);
 
   useEffect(() => {
     return () => {
-      dispatch(closeSocketAction(user));
+      dispatch(closeSocketAction(user,room));
     };
     // eslint-disable-next-line
   }, []);
   const handleSubmit = (e) => {
     e.preventDefault();
-    socket.emit("msg",user ,texto);
+    socket.emit("msg", user, texto,room);
+    setResponse([
+      ...response,
+      <li className="mt-2 text-left w-full max-w-sm mr-auto">
+        <span className="italic font-semibold text-lg mr-1">Me:</span>
+        {texto}
+      </li>,
+    ]);
     setTexto("");
   };
   return (
-    <div className="container shadow-md mx-auto flex flex-col min-h-full  justify-between bg-white ">
-      <div className=" flex-auto">
-        <ul>
-          {response.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+    <div className="container shadow-md mx-auto flex flex-col max-h-full min-h-full  justify-between bg-white  max-w-full">
+      <div className=" flex-auto overflow-auto ">
+        <ul className="px-2">{response.map((item) => item)}</ul>
       </div>
       <form onSubmit={handleSubmit} className="flex ">
         <input
